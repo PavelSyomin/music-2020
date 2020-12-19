@@ -4,6 +4,9 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(tm)
+library(wordcloud2)
+
+set.seed(42)
 
 # Function to calculate moving average
 mav <- function(x, n = 5)
@@ -17,7 +20,8 @@ mav <- function(x, n = 5)
 data <- read_ods("My_music_top_50_2020.ods")
 
 # Number of unique artists
-nrow(distinct(data, artist))
+n_artists <- nrow(distinct(data, artist))
+songs_per_artist <- nrow(data) / n_artists
 
 # Analyse artists
 artists <- data %>%
@@ -43,7 +47,10 @@ ggplot(genres, aes(x = genre, y = n_songs)) +
   coord_flip()
 
 # Analyse language
-table(data$language)
+songs_in_english <- table(data$language)[1]
+songs_in_german <- table(data$language)[2]
+songs_in_russian <- table(data$language)[3]
+songs_in_finnish <- table(data$language)[4]
 
 # Analyse years
 years <- data %>% 
@@ -58,9 +65,9 @@ ggplot(years, aes(x = year, y = n_songs)) +
 data$weight = 1 / (1 + exp(0.15 * (data$rank - 25)))
 
 # Visualize weights to see if they are selected properly
-qplot(x = data$rank, y = data$weight, geom = "line")
+weights_plot <- qplot(x = data$rank, y = data$weight, geom = "line")
 
-data %>% 
+artists_plot <- data %>% 
   group_by(artist) %>%
   summarise(index = sum(weight)) %>% 
   arrange(-index) %>% 
@@ -68,19 +75,20 @@ data %>%
   geom_col() +
   coord_flip()
 
-data %>% 
+genres_plot <- data %>% 
   group_by(genre) %>% 
   summarise(index = sum(weight)) %>%
   ggplot(aes(x = reorder(genre, index), y = index)) +
-  geom_col()
+  geom_col() +
+  coord_flip()
 
-data %>% 
+languages_plot <- data %>% 
   group_by(language) %>% 
   summarise(index = sum(weight)) %>% 
   ggplot(aes(x = reorder(language, index), y = index)) +
   geom_col()
 
-data %>% 
+years_plot <- data %>% 
   group_by(year) %>%
   summarise(index = sum(weight)) %>% 
   complete(year = 1970:2020, fill = list(index = 0)) %>% 
@@ -105,3 +113,38 @@ dtm <- TermDocumentMatrix(songs_texts, control = list(weighting = weightTf))
 dtm <- as.matrix(dtm)
 dtm <- sort(rowSums(dtm), decreasing = TRUE)
 dtm <- data.frame(word = names(dtm), freq = dtm)
+
+word_cloud <- wordcloud2(dtm[1:30,], size = 0.5)
+
+songs_texts_ge <- Corpus(DataframeSource(select(filter(data, language == "Немецкий"), doc_id = song, text)))
+
+songs_texts_ge <- tm_map(songs_texts_ge, content_transformer(tolower))
+
+songs_texts_ge <- tm_map(songs_texts_ge, removeWords, stopwords("german"))
+
+songs_texts_ge <- tm_map(songs_texts_ge, removePunctuation)
+
+songs_texts_ge <- tm_map(songs_texts_ge, stripWhitespace)
+
+songs_texts_ge <- tm_map(songs_texts_ge, stemDocument)
+
+dtm_ge <- TermDocumentMatrix(songs_texts_ge, control = list(weighting = weightTf))
+dtm_ge <- as.matrix(dtm_ge)
+dtm_ge <- sort(rowSums(dtm_ge), decreasing = TRUE)
+dtm_ge <- data.frame(word = names(dtm_ge), freq = dtm_ge)
+
+songs_texts_ru <- Corpus(DataframeSource(select(filter(data, language == "Русский"), doc_id = song, text)))
+
+songs_texts_ru <- tm_map(songs_texts_ru, content_transformer(tolower))
+
+songs_texts_ru <- tm_map(songs_texts_ru, removeWords, stopwords("ru"))
+
+songs_texts_ru <- tm_map(songs_texts_ru, removePunctuation)
+
+songs_texts_ru <- tm_map(songs_texts_ru, stripWhitespace)
+
+dtm_ru <- TermDocumentMatrix(songs_texts_ru, control = list(weighting = weightTf))
+dtm_ru <- as.matrix(dtm_ru)
+dtm_ru <- sort(rowSums(dtm_ru), decreasing = TRUE)
+dtm_ru <- data.frame(word = names(dtm_ru), freq = dtm_ru)
+
