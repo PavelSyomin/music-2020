@@ -67,10 +67,10 @@ data$weight = 1 / (1 + exp(0.15 * (data$rank - 25)))
 weights_plot <- ggplot(data, aes(x = rank, y = weight)) +
   geom_line(color = plots_color, size = 3) +
   scale_x_continuous(breaks = c(1, 25, 50), labels = c(1, 25, 50), name = "Номер песни") +
-  scale_y_continuous(breaks = c(0, 0.5, 1), labels = c("0", "0,5", "1"), name = "Вес") +
-  ggplot2::annotate(geom = "text", x = 1, y = 0.95, label = "Lindemann — Allesfresser", angle = 90, hjust = 1) +
-  ggplot2::annotate(geom = "text", x = 25, y = 0.45, label = "Ленинград — Жу-жу", angle = 90, hjust = 1) +
-  ggplot2::annotate(geom = "text", x = 50, y = 0.05, label = "Red Hot Chili Peppers — Californication", angle = 90, hjust = 0) +
+  scale_y_continuous(breaks = c(0.03, 0.5, 0.97), labels = c("0,03", "0,5", "0,97"), name = "Вес") +
+  ggplot2::annotate(geom = "text", x = 1, y = 0.95, label = "Lindemann — Allesfresser", angle = 90, hjust = 1, color = "grey30") +
+  ggplot2::annotate(geom = "text", x = 25, y = 0.45, label = "Ленинград — Жу-жу", angle = 90, hjust = 1, color = "grey30") +
+  ggplot2::annotate(geom = "text", x = 50, y = 0.05, label = "Red Hot Chili Peppers — Californication", angle = 90, hjust = 0, color = "grey30") +
   theme(panel.grid = element_blank(),
         axis.line = element_line())
 ggsave("weights_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
@@ -82,8 +82,14 @@ artists <- data %>%
   arrange(-index)
 
 artists_plot <- ggplot(artists, aes(x = reorder(artist, index), y = index)) +
-  geom_col() +
-  coord_flip()
+  geom_col(fill = plots_color) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
+  coord_flip() +
+  labs(x = "Исполнитель", y = "Вес") +
+  theme(panel.grid.major.y = element_blank(),
+        axis.text.y = element_text(vjust = 0.4))
+artists_plot
+ggsave("artists_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
 # Genres
 genres <- data %>% 
@@ -92,8 +98,13 @@ genres <- data %>%
   arrange(-index)
 
 genres_plot <- ggplot(genres, aes(x = reorder(genre, index), y = index)) +
-  geom_col() +
-  coord_flip()
+  geom_col(fill = plots_color) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(x = "Жанр", y = "Вес") +
+  coord_flip() +
+  theme(panel.grid.major.y = element_blank())
+genres_plot
+ggsave("genres_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
 # Languages
 languages <- data %>% 
@@ -104,7 +115,7 @@ languages <- data %>%
 languages_plot <- ggplot(languages, aes(x = reorder(language, index), y = index)) +
   geom_col(fill = plots_color) +
   scale_y_continuous(expand = expansion(add = c(0, 2))) +
-  labs(x = "Язык текста песни", y = "Индекс") +
+  labs(x = "Язык текста песни", y = "Вес") +
   theme(panel.grid.major.x = element_blank())
 ggsave("languages_plot.png", languages_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
@@ -116,9 +127,12 @@ years <- data %>%
   mutate(year = as.numeric(year))
 
 years_plot <- ggplot(years, aes(x = year)) +
-  geom_line(aes(y = mav(index, 5))) +
-  geom_line(aes(y = index), alpha = .5)
-
+  geom_line(aes(y = as.numeric(mav(index, 5))), color = plots_color, size = 3) +
+  geom_line(aes(y = index), color = plots_color, size = 0.5, alpha = 0.5) +
+  labs(x = "Год", y = "Вес") +
+  theme(panel.grid.major.x = element_blank())
+years_plot
+ggsave("years_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
 # Analysis of songs texts
 # Select only songs in English and load them as a corpora
@@ -148,7 +162,8 @@ words_freq[words_freq$word == "morn", "word"] <- "morning"
 words_freq[words_freq$word == "californ", "word"] <- "California"
 
 # Draw a wordcloud of the first 50 words
-word_cloud <- wordcloud2(words_freq[1:50,], size = 0.5)
+# Colors made with https://color.adobe.com/create/color-wheel double split complementary color scheme with plots_color as the third color
+word_cloud <- wordcloud2(words_freq[1:50,], size = 0.5, fontFamily = "PT Serif")
 
 # Terms by tf-idf
 tdm_tf_idf <- TermDocumentMatrix(songs_texts, control = list(weighting = weightTfIdf))
