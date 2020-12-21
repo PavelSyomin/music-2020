@@ -87,9 +87,9 @@ artists_plot <- ggplot(artists, aes(x = reorder(artist, index), y = index)) +
   coord_flip() +
   labs(x = "Исполнитель", y = "Вес") +
   theme(panel.grid.major.y = element_blank(),
-        axis.text.y = element_text(vjust = 0.4))
+        axis.text.y = element_text(vjust = 0.4, size = 8))
 artists_plot
-ggsave("artists_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
+ggsave("artists_plot.png", artists_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
 # Genres
 genres <- data %>% 
@@ -104,7 +104,7 @@ genres_plot <- ggplot(genres, aes(x = reorder(genre, index), y = index)) +
   coord_flip() +
   theme(panel.grid.major.y = element_blank())
 genres_plot
-ggsave("genres_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
+ggsave("genres_plot.png", genres_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
 # Languages
 languages <- data %>% 
@@ -132,7 +132,7 @@ years_plot <- ggplot(years, aes(x = year)) +
   labs(x = "Год", y = "Вес") +
   theme(panel.grid.major.x = element_blank())
 years_plot
-ggsave("years_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
+ggsave("years_plot.png", years_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
 # Analysis of songs texts
 # Select only songs in English and load them as a corpora
