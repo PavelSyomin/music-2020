@@ -75,6 +75,34 @@ weights_plot <- ggplot(data, aes(x = rank, y = weight)) +
         axis.line = element_line())
 ggsave("weights_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
+weighting_variants <- data.frame(rank = 1:50) %>% 
+  mutate(linear = (51 - rank) / 50,
+         reverse = 1 / rank,
+         cubic_reverse = 1 / rank ** (1/3),
+         cosinus = cos(1:50 / 50),
+         stepwise = sort(rep(c(50, 40, 30, 20, 10), 10), decreasing = TRUE) / 50,
+         ) %>% 
+  pivot_longer(linear:stepwise, names_to = "variant", values_to = "value")
+
+christmas_tree_x_left <- c(21, rep(21, 11), 6, 16, 19, 8.5, 17, 12, 21, 25, 21, 22, 19.5, 23)
+christmas_tree_y_left <- c(0, rep(0.18, 11), 0.18, 0.4, 0.4, 0.4, 0.58, 0.58, 0.78, 0.82, 0.78, 0.84, 0.88, 0.92)
+christmas_tree <- data.frame(rank = c(christmas_tree_x_left, 25, 25,  50 - rev(christmas_tree_x_left)),
+                             variant = "christmas_tree",
+                             value = c(christmas_tree_y_left, 1, 1, rev(christmas_tree_y_left)))
+weighting_variants <- rbind(weighting_variants, christmas_tree)
+weighting_variants <- mutate(weighting_variants, variant = factor(variant, levels = c("linear", "reverse", "cubic_reverse", "cosinus", "stepwise", "christmas_tree"), labels = c("Прямая линия", "Кривая линия", "Ещё одна кривая", "Или такая кривая", "Лесенка", "Это шутка"))
+)
+weights_variants_plot <- ggplot(weighting_variants, aes(x = rank, y = value)) +
+  geom_path(color = plots_color, size = 3) +
+  scale_x_continuous(breaks = c(1, 25, 50), name = "Номер песни в плейлисте") +
+  scale_y_continuous(breaks = c(0, 0.5, 1), labels = c("0", "0,5", "1"), name = "Вес песни") +
+  facet_wrap(~variant) +
+  coord_fixed(ratio = 50) +
+  theme(strip.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.line = element_line())
+ggsave("weights_variants_plot.png", weights_variants_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
+
 # Artists
 artists <- data %>% 
   group_by(artist) %>%
