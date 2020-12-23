@@ -196,7 +196,8 @@ words_freq[words_freq$word == "californ", "word"] <- "California"
 
 # Draw a wordcloud of the first 50 words
 # Colors made with https://color.adobe.com/create/color-wheel double split complementary color scheme with plots_color as the third color
-word_cloud <- wordcloud2(words_freq[1:50,], size = 0.5, fontFamily = "PT Serif")
+word_cloud_colors <- c("#94072A", "#948C0F", "#800094", "#0F9422", "#350794")
+word_cloud <- wordcloud2(words_freq[1:50,], size = 0.5, fontFamily = "PT Serif", color = rep(word_cloud_colors, 10))
 
 # Terms by tf-idf
 tdm_tf_idf <- TermDocumentMatrix(songs_texts, control = list(weighting = weightTfIdf))
