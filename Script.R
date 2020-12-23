@@ -75,6 +75,8 @@ weights_plot <- ggplot(data, aes(x = rank, y = weight)) +
         axis.line = element_line())
 ggsave("weights_plot.png", weights_plot, width = unit(8, "cm"), height = unit(5, "cm"), dpi = 150)
 
+# Draw an illustration to weighting variants
+# Make a dataframe to visualize
 weighting_variants <- data.frame(rank = 1:50) %>% 
   mutate(linear = (51 - rank) / 50,
          reverse = 1 / rank,
@@ -84,14 +86,16 @@ weighting_variants <- data.frame(rank = 1:50) %>%
          ) %>% 
   pivot_longer(linear:stepwise, names_to = "variant", values_to = "value")
 
+# Add a joke with christmas tree
 christmas_tree_x_left <- c(21, rep(21, 11), 6, 16, 19, 8.5, 17, 12, 21, 25, 21, 22, 19.5, 23)
 christmas_tree_y_left <- c(0, rep(0.18, 11), 0.18, 0.4, 0.4, 0.4, 0.58, 0.58, 0.78, 0.82, 0.78, 0.84, 0.88, 0.92)
 christmas_tree <- data.frame(rank = c(christmas_tree_x_left, 25, 25,  50 - rev(christmas_tree_x_left)),
                              variant = "christmas_tree",
                              value = c(christmas_tree_y_left, 1, 1, rev(christmas_tree_y_left)))
 weighting_variants <- rbind(weighting_variants, christmas_tree)
-weighting_variants <- mutate(weighting_variants, variant = factor(variant, levels = c("linear", "reverse", "cubic_reverse", "cosinus", "stepwise", "christmas_tree"), labels = c("Прямая линия", "Кривая линия", "Ещё одна кривая", "Или такая кривая", "Лесенка", "Это шутка"))
-)
+weighting_variants <- mutate(weighting_variants, variant = factor(variant, levels = c("linear", "reverse", "cubic_reverse", "cosinus", "stepwise", "christmas_tree"), labels = c("Прямая линия", "Кривая линия", "Ещё одна кривая", "Или такая кривая", "Лесенка", "Это шутка")))
+
+# Draw and save the plot
 weights_variants_plot <- ggplot(weighting_variants, aes(x = rank, y = value)) +
   geom_path(color = plots_color, size = 3) +
   scale_x_continuous(breaks = c(1, 25, 50), name = "Номер песни в плейлисте") +
@@ -168,6 +172,7 @@ songs_texts <- Corpus(DataframeSource(select(filter(data, language == "Англ�
 
 # Preprocess texts
 songs_texts <- tm_map(songs_texts, content_transformer(tolower))
+songs_texts <- tm_map(songs_texts, gsub, pattern = "’", replacement = "'")
 songs_texts <- tm_map(songs_texts, removeWords, stopwords())
 songs_texts <- tm_map(songs_texts, stemDocument)
 songs_texts <- tm_map(songs_texts, removePunctuation)
@@ -182,7 +187,7 @@ words_freq <- data.frame(word = names(tdm), freq = tdm)
 
 # Manual cleanup to remove strange "’s" and to restore two words after stemming
 # Necessary for a better wordcloud
-words_freq <- words_freq[words_freq$word != "’s" & words_freq$word != "’m", ]
+# words_freq <- words_freq[words_freq$word != "’s" & words_freq$word != "’m", ]
 words_freq[words_freq$word == "caus", "word"] <- "cause"
 words_freq[words_freq$word == "unstopp", "word"] <- "unstoppable"
 words_freq[words_freq$word == "babi", "word"] <- "baby"
@@ -197,4 +202,4 @@ word_cloud <- wordcloud2(words_freq[1:50,], size = 0.5, fontFamily = "PT Serif")
 tdm_tf_idf <- TermDocumentMatrix(songs_texts, control = list(weighting = weightTfIdf))
 tdm_tf_idf <- as.matrix(tdm_tf_idf)
 tdm_tf_idf <- sort(rowSums(tdm_tf_idf), decreasing = TRUE)
-words_tf_idf <- data.frame(word = names(tdm_tf_idf), freq = tdm_tf_idf)
+words_freq_tf_idf <- data.frame(word = names(tdm_tf_idf), freq = tdm_tf_idf)
