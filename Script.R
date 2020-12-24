@@ -204,3 +204,4 @@ tdm_tf_idf <- TermDocumentMatrix(songs_texts, control = list(weighting = weightT
 tdm_tf_idf <- as.matrix(tdm_tf_idf)
 tdm_tf_idf <- sort(rowSums(tdm_tf_idf), decreasing = TRUE)
 words_freq_tf_idf <- data.frame(word = names(tdm_tf_idf), freq = tdm_tf_idf)
+
