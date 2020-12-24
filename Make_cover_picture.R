@@ -136,6 +136,6 @@ cover_picture <- ggplot(logo_points, aes(x = x, y = y, size = size)) +
         axis.line = element_line(arrow = arrow(angle = 10, type = "closed")),
         axis.text = element_blank())
 
-ggsave("cover_picture.png", cover_picture, width = unit(12, "cm"), height = unit(6, "cm"))
+ggsave("cover_picture.png", cover_picture, width = unit(6, "cm"), height = unit(3, "cm"))
 
 ggsave()
