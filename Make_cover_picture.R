@@ -90,18 +90,18 @@ ggplot(rammstein_df, aes(x, -y)) +
 
 # Offsets
 lindemann_df$x <- lindemann_df$x - 100
-lindemann_df$y <- lindemann_df$y - 30
+lindemann_df$y <- lindemann_df$y - 15
 
-lordi_df$x <- lordi_df$x + 350
-lordi_df$y <- lordi_df$y + 50
+lordi_df$x <- lordi_df$x + 200
+lordi_df$y <- lordi_df$y + 100
 
-idragons_df$x <- idragons_df$x + 300
-idragons_df$y <- idragons_df$y + 0
+idragons_df$x <- idragons_df$x + 100
+idragons_df$y <- idragons_df$y + 15
 
-sampsa_astala_df$x <- sampsa_astala_df$x + 950
-sampsa_astala_df$y <- sampsa_astala_df$y -50
+sampsa_astala_df$x <- sampsa_astala_df$x + 100
+sampsa_astala_df$y <- sampsa_astala_df$y + 0
 
-rammstein_df$x <- rammstein_df$x + 1400
+rammstein_df$x <- rammstein_df$x + 400
 rammstein_df$y <- rammstein_df$y + 20
 
 # Labels for colors
@@ -123,12 +123,13 @@ plots_theme <- theme_bw(base_size = 16, base_family = "PT Sans") +
 theme_set(plots_theme)
 plots_color <- "#800094"
 
-cover_picture <- ggplot(logo_points, aes(x = x, y = y, size = size)) +
-  geom_point(color = plots_color) +
+cover_picture <- ggplot(logo_points, aes(x = x, y = y, size = size, color = group)) +
+  geom_point() +
   scale_size_manual(values = c(1, 2, 4), guide = NULL) +
-  #scale_color_manual(values = c("#350794", "#948C0F", "#800094", "#0F9422", "#94072A"), guide = NULL) +
+  scale_color_manual(values = c("#350794", "#0F9422",  "#948C0F", "#94072A", "#800094"), guide = NULL) +
+  #scale_x_continuous(breaks = NULL) +
   coord_fixed(1) +
-  labs(x = "", y = "") +
+  labs(x = NULL, y = NULL, title = NULL, caption = NULL) +
   # facet_wrap(~group, scales = "fixed") +
   theme(panel.grid = element_blank(),
         strip.background = element_blank(),
@@ -136,6 +137,4 @@ cover_picture <- ggplot(logo_points, aes(x = x, y = y, size = size)) +
         axis.line = element_line(arrow = arrow(angle = 10, type = "closed")),
         axis.text = element_blank())
 
-ggsave("cover_picture.png", cover_picture, width = unit(6, "cm"), height = unit(3, "cm"))
-
-ggsave()
+ggsave("cover_picture.png", cover_picture, width = unit(4, "cm"), height = unit(4 / 780 * 440, "cm"), dpi = 780 / 4)
